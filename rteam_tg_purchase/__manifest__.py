@@ -1,11 +1,11 @@
 {
-    "name": "Rteam Telegram Approvals: Purchase Orders",
+    "name": "Telegram Approvals: Purchase Orders",
     "version": "19.0.1.0.5",
     "category": "Purchases",
     "summary": "One-tap Purchase Order approvals in Telegram. CEO/CFO sign-off from a phone, anywhere.",
     "description": """
-Rteam Telegram Approvals: Purchase Orders
-=========================================
+Telegram Approvals: Purchase Orders
+===================================
 
 Stop chasing your CEO with "please confirm PO #1234". When a Purchase
 Order over your threshold is confirmed, an inline Telegram message
