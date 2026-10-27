@@ -60,7 +60,6 @@ model: ``on_rteam_tg_approval_resolved(request, new_state)``.
     "license": "LGPL-3",
     "depends": ["rteam_tg_auth", "purchase"],
     "data": [
-        "security/ir.model.access.csv",
         "data/ir_config_parameter_data.xml",
         "views/purchase_order_views.xml",
         "views/res_config_settings_views.xml",
