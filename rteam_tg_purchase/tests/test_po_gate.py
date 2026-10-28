@@ -12,9 +12,9 @@ class TestPurchaseGate(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         params = cls.env["ir.config_parameter"].sudo()
-        params.set_param("rteam_tg_auth.bot_token", "TEST_TOKEN")
-        params.set_param("rteam_tg_auth.webhook_secret", "deadbeef" * 4)
-        params.set_param("rteam_tg_auth.bot_username", "test_bot")
+        params.set_str("rteam_tg_auth.bot_token", "TEST_TOKEN")
+        params.set_str("rteam_tg_auth.webhook_secret", "deadbeef" * 4)
+        params.set_str("rteam_tg_auth.bot_username", "test_bot")
 
         # Purchase user rights only: what a buyer and an approving CFO hold.
         buyer = cls.env.ref("purchase.group_purchase_user")
@@ -57,8 +57,8 @@ class TestPurchaseGate(TransactionCase):
 
     def _set_gate(self, threshold, approver_id):
         params = self.env["ir.config_parameter"].sudo()
-        params.set_param("rteam_tg_purchase.threshold", str(threshold))
-        params.set_param("rteam_tg_purchase.approver_user_id", str(approver_id))
+        params.set_float("rteam_tg_purchase.threshold", threshold)
+        params.set_int("rteam_tg_purchase.approver_user_id", approver_id)
 
     def _patched_tg(self):
         return patch.multiple(

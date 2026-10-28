@@ -1,6 +1,6 @@
 # rteam-tg-purchase
 
-One-tap **Purchase Order approvals in Telegram** for Odoo 19. CEO/CFO sign-off
+One-tap **Purchase Order approvals in Telegram** for Odoo 19 and 20. CEO/CFO sign-off
 from a phone, anywhere — no VPN, no Odoo login, no inbox dig.
 
 ## What it does
@@ -21,6 +21,7 @@ your approver(s) to Telegram via My Preferences before the gate can fire.
 
 - `main` — primary working branch.
 - `19.0` — exact mirror of `main`, the branch apps.odoo.com Scan reads from.
+- `20.0` — Odoo 20, from `19.0` with the 20.0 codemods and API port.
 
 Per Rteam Odoo Apps convention every push to `main` is mirrored to `19.0`.
 17.0 / 18.0 backports follow on demand.
