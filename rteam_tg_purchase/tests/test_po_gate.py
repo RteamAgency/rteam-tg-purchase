@@ -16,8 +16,14 @@ class TestPurchaseGate(TransactionCase):
         params.set_param("rteam_tg_auth.webhook_secret", "deadbeef" * 4)
         params.set_param("rteam_tg_auth.bot_username", "test_bot")
 
-        cls.requester = cls.env["res.users"].create({"name": "Buyer Joe", "login": "buyer_joe_t4"})
-        cls.approver = cls.env["res.users"].create({"name": "CFO Anna", "login": "cfo_anna_t4"})
+        # Purchase user rights only: what a buyer and an approving CFO hold.
+        buyer = cls.env.ref("purchase.group_purchase_user")
+        cls.requester = cls.env["res.users"].create(
+            {"name": "Buyer Joe", "login": "buyer_joe_t4", "group_ids": [(6, 0, [buyer.id])]}
+        )
+        cls.approver = cls.env["res.users"].create(
+            {"name": "CFO Anna", "login": "cfo_anna_t4", "group_ids": [(6, 0, [buyer.id])]}
+        )
         cls.env["rteam.tg.binding"].create(
             {
                 "user_id": cls.approver.id,
@@ -69,7 +75,7 @@ class TestPurchaseGate(TransactionCase):
         po = self._po(qty=1, price=100.0)
         with self._patched_tg():
             po.with_user(self.requester).button_confirm()
-        po.refresh()
+        po.invalidate_recordset()
         self.assertEqual(po.state, "purchase")
         # No approval row created.
         self.assertEqual(
@@ -84,7 +90,7 @@ class TestPurchaseGate(TransactionCase):
         po = self._po(qty=10, price=100.0)
         with self._patched_tg():
             po.with_user(self.requester).button_confirm()
-        po.refresh()
+        po.invalidate_recordset()
         self.assertEqual(po.state, "purchase")
 
     def test_self_approve_passes_through(self):
@@ -92,7 +98,7 @@ class TestPurchaseGate(TransactionCase):
         po = self._po(qty=10, price=100.0)
         with self._patched_tg():
             po.with_user(self.requester).button_confirm()
-        po.refresh()
+        po.invalidate_recordset()
         self.assertEqual(po.state, "purchase")
 
     def test_self_approve_posts_explanation_to_chatter(self):
@@ -130,7 +136,7 @@ class TestPurchaseGate(TransactionCase):
         po = self._po(qty=10, price=100.0)
         with self._patched_tg():
             po.with_user(self.requester).button_confirm()
-        po.refresh()
+        po.invalidate_recordset()
         self.assertEqual(po.state, "draft", "PO must be held in draft until approval")
         req = self.env["rteam.tg.approval.request"].search(
             [("source_model", "=", "purchase.order"), ("source_id", "=", po.id)],
@@ -163,7 +169,7 @@ class TestPurchaseGate(TransactionCase):
         with self._patched_tg():
             ok = req._resolve("y", callback_query_id="cbq", actor_chat_id="555555")
         self.assertTrue(ok)
-        po.refresh()
+        po.invalidate_recordset()
         self.assertEqual(po.state, "purchase", "Approve must trigger super().button_confirm")
         # Chatter note exists.
         msgs = self.env["mail.message"].search(
@@ -184,7 +190,7 @@ class TestPurchaseGate(TransactionCase):
         with self._patched_tg():
             ok = req._resolve("n", callback_query_id="cbq", actor_chat_id="555555")
         self.assertTrue(ok)
-        po.refresh()
+        po.invalidate_recordset()
         self.assertEqual(po.state, "draft", "Reject must NOT confirm")
         msgs = self.env["mail.message"].search(
             [("model", "=", "purchase.order"), ("res_id", "=", po.id)]
@@ -197,6 +203,6 @@ class TestPurchaseGate(TransactionCase):
         po = self._po(qty=10, price=100.0)
         with self._patched_tg():
             po.with_user(self.requester).button_confirm()
-        po.refresh()
+        po.invalidate_recordset()
         self.assertTrue(po.rteam_tg_has_pending)
         self.assertTrue(po.rteam_tg_pending_request_id)

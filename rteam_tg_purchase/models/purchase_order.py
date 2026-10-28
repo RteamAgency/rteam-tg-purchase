@@ -7,6 +7,8 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
+PENDING_FIELDS = ["rteam_tg_pending_request_id", "rteam_tg_has_pending"]
+
 
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
@@ -126,6 +128,10 @@ class PurchaseOrder(models.Model):
                 order.message_post(body=reason, subtype_xmlid="mail.mt_note")
 
         for order in gated_orders:
+            # Neither field is stored nor depends on the approval rows: read
+            # it fresh, or a second Confirm in the same transaction sends a
+            # second approval request.
+            order.invalidate_recordset(PENDING_FIELDS)
             existing = order.rteam_tg_pending_request_id
             if existing:
                 raise UserError(
@@ -144,6 +150,7 @@ class PurchaseOrder(models.Model):
                 summary=summary,
                 requester_user=self.env.user,
             )
+            order.invalidate_recordset(PENDING_FIELDS)
             order.message_post(
                 body=_(
                     "Telegram approval request sent to %(approver)s. "
